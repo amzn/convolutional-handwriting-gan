@@ -1,4 +1,4 @@
-name: pytorch1.2
+name: scrabble
 channels:
   - pytorch
   - ericmjl
@@ -50,7 +50,6 @@ dependencies:
   - numpy=1.16.4=py36h99e49ec_0
   - numpy-base=1.16.4=py36h2f8d375_0
   - olefile=0.46=py36_0
-  - openssl=1.1.1=h7b6447c_0
   - pandas=0.24.2=py36he6710b0_0
   - pandoc=2.2.3.2=0
   - pandocfilters=1.4.2=py36_1
@@ -192,5 +191,5 @@ dependencies:
     - lmdb==0.92
     - tb-nightly==1.15.0a20190806
     - torch==1.2.0
-prefix: /home/ubuntu/anaconda3/envs/pytorch1.2
+prefix: /home/ubuntu/anaconda3/envs/scrabble
 

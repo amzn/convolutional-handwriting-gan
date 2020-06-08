@@ -102,6 +102,8 @@ class ScrabbleGANBaseModel(BaseModel):
                 if len(word)<20:
                     lex.append(word)
             self.lex = lex
+        else:
+            raise ValueError('could not load lexicon ')
         self.fixed_noise_size = 2
         self.fixed_noise, self.fixed_fake_labels = prepare_z_y(self.fixed_noise_size, opt.dim_z,
                                        len(self.lex), device=self.device,
@@ -134,7 +136,7 @@ class ScrabbleGANBaseModel(BaseModel):
         self.l1_loss = L1Loss()
         self.mse_loss = MSELoss()
         self.OCRconverter = OCRLabelConverter(opt.alphabet)
-        self.epsilon = 10e-50
+        self.epsilon = 1e-7
         self.real_z = None
         self.real_z_mean = None
 
@@ -221,7 +223,7 @@ class ScrabbleGANBaseModel(BaseModel):
         self.idx_real = input['idx']  # get image paths
 
     def load_networks(self, epoch):
-        BaseModel.load_networks(self,epoch)
+        BaseModel.load_networks(self, epoch)
         if self.opt.single_writer:
             load_filename = '%s_z.pkl' % (epoch)
             load_path = os.path.join(self.save_dir, load_filename)
@@ -318,16 +320,17 @@ class ScrabbleGANBaseModel(BaseModel):
 
     def backward_D(self):
         # Real
-        pred_real = self.netD(**{'x': self.real.detach(), 'z': self.real_z_mean.detach()})
-        pred_fake = self.netD(**{'x':self.fake.detach(), 'z': self.z.detach()})
+        if self.real_z_mean is None:
+            pred_real = self.netD(self.real.detach())
+        else:
+            pred_real = self.netD(**{'x': self.real.detach(), 'z': self.real_z_mean.detach()})
+        pred_fake = self.netD(**{'x': self.fake.detach(), 'z': self.z.detach()})
         # Combined loss
         self.loss_Dreal, self.loss_Dfake = loss_hinge_dis(pred_fake, pred_real, self.len_text_fake.detach(), self.len_text.detach(), self.opt.mask_loss)
         self.loss_D = self.loss_Dreal + self.loss_Dfake
         # backward
         self.loss_D.backward()
-        if any(self.netD.infer_img.blocks[0][0].conv1.bias.grad==0) or any(torch.isnan(self.netD.infer_img.blocks[0][0].conv1.bias.grad)) or any(torch.isnan(self.netD.infer_img.blocks[0][0].conv1.bias)):
-            print('gradients of D are nan')
-            sys.exit()
+
         if self.opt.clip_grad > 0:
              clip_grad_norm_(self.netD.parameters(), self.opt.clip_grad)
         return self.loss_D

@@ -30,9 +30,9 @@ This is a pytorch implementation of the paper
     * `--capitalize`: randomly capitalize first letters of words in the lexicon used.
     * `--display_port`: visdom display port
     * `--checkpoints_dir`: the networks weights and sample images are saved to `checkpoints_dir/experiment_name`.
-    * `--use_lstm`: whether to use LSTM
+    * `--use_rnn`: whether to use LSTM
     * `--seed`: determine the seed for numpy and pytorch instead of using a random one.
-    * `--alpha_gb`: the balance between the recognizer and discriminator loss. Higher alpha means larger weight for the recognizer.
+    * `--gb_alpha`: the balance between the recognizer and discriminator loss. Higher alpha means larger weight for the recognizer.
 * Other arguments are explained in the file `options/base_options.py` and `options/train_options.py`.
 
 
