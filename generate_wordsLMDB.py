@@ -142,9 +142,13 @@ if __name__ == '__main__':
         else:
             n_imgs = 1000000
         n_jobs = torch.cuda.device_count()
-        kwargs_gen = (dict(device=i, nsamples=int(n_imgs/n_jobs)) for i in range(n_jobs))
-        data = Parallel(n_jobs=n_jobs)(delayed(GenImgs)(**kwargs) for kwargs in kwargs_gen)
-
+        if n_jobs == 0:  # Use cpu
+            # let n_jobs = 1
+            _kwargs = dict(device="cpu", nsamples=int(n_imgs))
+            data = [GenImgs(**_kwargs)]  # EDIT https://joblib.readthedocs.io/en/latest/parallel.html
+        else:
+            kwargs_gen = (dict(device=i, nsamples=int(n_imgs / n_jobs)) for i in range(n_jobs))
+            data = Parallel(n_jobs=n_jobs)(delayed(GenImgs)(**kwargs) for kwargs in kwargs_gen)
 
         for d in data:
             for i in tqdm(range(len(d[0]))):
